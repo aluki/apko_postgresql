@@ -1,0 +1,13 @@
+contents:
+  repositories:
+    - https://dl-cdn.alpinelinux.org/alpine/edge/main
+    - https://dl-cdn.alpinelinux.org/alpine/edge/community
+  packages:
+    - tini
+    - postgresql18
+
+archs: [amd64]
+
+entrypoint:
+  command: tini
+cmd: /usr/bin/postgres18

@@ -1,0 +1,79 @@
+# https://taskfile.dev
+
+version: '3'
+
+dotenv:
+  - .env
+  - .env.dist
+
+tasks:
+
+  default:
+    cmds:
+      - task -l
+    silent: true
+
+  init:
+    desc: Initialises the project
+    sources:
+      - mise.toml
+    generates:
+      - mise.lock
+    cmds:
+      - mise install
+
+  build:
+    desc: Builds the image
+    deps:
+      - init
+    requires:
+      vars:
+        - IMAGE
+        - TAG
+    sources:
+      - config.yaml
+      - .env.dist
+      - .env
+    generates:
+      - image.tar
+    cmds:
+      - apko build config.yaml {{.IMAGE}}:{{.TAG}} image.tar
+
+  install:
+    desc: Installs the image
+    deps:
+      - build
+    sources:
+      - image.tar
+    cmds:
+      - cat image.tar | docker load
+
+  run:
+    desc: Runs the image
+    deps:
+      - install
+    requires:
+      vars:
+        - IMAGE
+        - TAG
+    cmds:
+      - docker run --rm -it {{.IMAGE}}:{{.TAG}}-amd64 {{.CLI_ARGS}}
+
+  console:
+    desc: Runs a console inside the image
+    deps:
+      - install
+    requires:
+      vars:
+        - IMAGE
+        - TAG
+    cmds:
+      - docker run --rm -it {{.IMAGE}}:{{.TAG}}-amd64 sh
+
+  test:
+    desc: Test the project
+    deps:
+      - build
+    cmds:
+      - echo "Implement me"
+      - false
